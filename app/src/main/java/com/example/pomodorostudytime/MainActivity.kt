@@ -19,11 +19,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var timerTextView: TextView
 
     // Timer elements and values
+    // Contains the logic for counting down the time
     private var countDownTimer: CountDownTimer? = null
     private var isTimerRunning = false
     private var timeLeftInMilis: Long = 25 * 60 * 1000
 
-
+    // Used for the layout of the app
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -43,5 +44,50 @@ class MainActivity : AppCompatActivity() {
         resetButton.setOnClickListener {
             resetTimer()
         }
+
+        updateCountdownText()
+    }
+
+    private fun startTimer(){
+        countDownTimer = object : CountDownTimer(timeLeftInMilis, 1000){
+            override fun onTick(millisUntilFinished: Long) {
+                timeLeftInMilis = millisUntilFinished
+                updateCountdownText()
+            }
+
+            override fun onFinish() {
+                isTimerRunning = false
+                timerTextView.text = "Done!"
+            }
+        }.start()
+
+        isTimerRunning = true
+        startButton.visibility = Button.GONE
+        pauseButton.visibility = Button.VISIBLE
+    }
+
+    private fun pauseTimer(){
+        // stop timer/null does nothing
+        countDownTimer?.cancel()
+        isTimerRunning = false
+        startButton.visibility = Button.VISIBLE
+        pauseButton.visibility = Button.GONE
+    }
+
+    private fun resetTimer(){
+        countDownTimer?.cancel()
+        timeLeftInMilis = 25 * 60 * 1000
+        isTimerRunning = false
+        updateCountdownText()
+        startButton.visibility = Button.VISIBLE
+        pauseButton.visibility = Button.GONE
+    }
+
+    private fun updateCountdownText(){
+        val minutes = (timeLeftInMilis / 1000) / 60
+        val seconds = (timeLeftInMilis / 1000) % 60
+        // formats the time into a string
+        val formatTime = String.format("%02d:%02d", minutes, seconds)
+        timerTextView.text = formatTime
     }
 }
